@@ -3,6 +3,7 @@ import './App.css';
 import Description from './components/Description/Description';
 import Options from './components/Options/Options';
 import Feedback from './components/Feedback/Feedback';
+import Notification from './components/Notification/Notification';
 
 function App() {
   const [rating, setRating] = useState(() => {
@@ -27,6 +28,9 @@ function App() {
     window.localStorage.setItem('saveData', JSON.stringify(rating));
   }, [rating]);
 
+  const totalFeedback = rating.good + rating.neutral + rating.bad;
+  const positive = Math.round((rating.good / totalFeedback) * 100);
+
   const updateFeedback = feedbackType => {
     if (feedbackType === 'reset') {
       setRating({
@@ -37,18 +41,21 @@ function App() {
       return;
     }
 
-    rating[feedbackType] = rating[feedbackType] + 1;
     setRating({
       ...rating,
-      feedbackType: rating[feedbackType],
+      [feedbackType]: rating[feedbackType] + 1,
     });
   };
 
   return (
     <>
       <Description />
-      <Options onUpdate={updateFeedback} rating={rating} />
-      <Feedback rating={rating} />
+      <Options onUpdate={updateFeedback} total={totalFeedback} />
+      {totalFeedback > 0 ? (
+        <Feedback rating={rating} total={totalFeedback} positive={positive} />
+      ) : (
+        <Notification />
+      )}
     </>
   );
 }
